@@ -75,13 +75,32 @@ class Api
     function requestHeader()
     {
         $endpointParts = explode('/', $_SERVER['REQUEST_URI']);
-        $targetParts = explode('?', end($endpointParts));
+        $next = false;
+        $function = false;
+        foreach ($endpointParts as $part){
+            if($next && !$function){
+                $function = $this->normalize(explode('?', $part));
+            }
+            if($part == 'api.v1'){
+                $next = true;
+            }
+        }
+
+        $this->header['target'] = $function;
+    }
+
+    /**
+     * @param $parts
+     * @return string
+     */
+    function normalize($parts)
+    {
         $target = '';
-        $normalize = explode('-', $targetParts[0]);
+        $normalize = explode('-', $parts[0]);
         foreach ($normalize as $i => $part) {
             $target .= $i > 0 ? ucfirst($part) : $part;
         }
-        $this->header['target'] = $target;
+        return $target;
     }
 
     /**
